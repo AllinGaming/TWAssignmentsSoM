@@ -308,7 +308,11 @@ TWA.raid = {
     ['priest'] = {},
     ['rogue'] = {},
     ['shaman'] = {},
-    ['hunter'] = {}
+    ['hunter'] = {},
+    ['tanks'] = {},
+    ['tank'] = {},
+    ['healers'] = {},
+    ['absence'] = {}
 }
 
 -- testing
@@ -473,19 +477,23 @@ TWA:SetScript("OnEvent", function()
                     ['priest'] = {},
                     ['rogue'] = {},
                     ['shaman'] = {},
-                    ['hunter'] = {}
+                    ['hunter'] = {},
+                    ['tanks'] = {},
+                    ['tank'] = {},
+                    ['healers'] = {},
+                    ['absence'] = {}
                 }
                 TWA.raid = TWA_RAID
             end
-            print("TWA_LOADED_TEMPLATE:".. TWA_LOADED_TEMPLATE)
+            print("TWA_LOADED_TEMPLATE:" .. TWA_LOADED_TEMPLATE)
             if not TWA_LOADED_TEMPLATE then
                 TWA_LOADED_TEMPLATE = TWA.loadedTemplate
             end
             TWA.loadedTemplate = TWA_LOADED_TEMPLATE
             TWA.raid = TWA_RAID
             TWA.data = TWA_DATA
-            TWA.fillRaidDataCustom()
-            TWA.PopulateTWA()
+            -- TWA.fillRaidDataCustom()
+            -- TWA.PopulateTWA()
             tinsert(UISpecialFrames, "TWA_Main") -- makes window close with Esc key
             if (TWA.loadedTemplate ~= '') then
                 getglobal('TWA_MainTemplates'):SetText(TWA.loadedTemplate)
@@ -496,8 +504,8 @@ TWA:SetScript("OnEvent", function()
             TWA.InitClassDropdown()
         end
         if event == "RAID_ROSTER_UPDATE" then
-            TWA.fillRaidDataCustom()
-            TWA.PopulateTWA()
+            -- TWA.fillRaidDataCustom()
+            -- TWA.PopulateTWA()
         end
         if event == 'CHAT_MSG_ADDON' and arg1 == "TWA" then
             twadebug(arg4 .. ' says: ' .. arg2)
@@ -569,7 +577,10 @@ function TWA.markOrPlayerUsed(markOrPlayer)
     end
     return false
 end
-
+-- function populateFromRaid()
+--     TWA.fillRaidDataCustom()
+--     TWA.PopulateTWA()
+-- end
 function fillRaidDataReset()
     twadebug('fill raid data')
     TWA.raid = {
@@ -581,7 +592,11 @@ function fillRaidDataReset()
         ['priest'] = {},
         ['rogue'] = {},
         ['shaman'] = {},
-        ['hunter'] = {}
+        ['hunter'] = {},
+        ['tanks'] = {},
+        ['tank'] = {},
+        ['healers'] = {},
+        ['absence'] = {}
     }
     for i = 0, GetNumRaidMembers() do
         if GetRaidRosterInfo(i) then
@@ -684,6 +699,1233 @@ function addManualRaider()
     -- table.sort(TWA.raid[unitClass])
     -- twaprint("Added " .. name .. " as a " .. unitClass .. " to the raid list.")
 end
+function parsePlayersFromRaid()
+    TWA.fillRaidDataCustom()
+    TWA.PopulateTWA()
+end
+-- Function to extract player names and classes from JSON input
+function parsePlayersFromJSON()
+    local exampleJSONe = TWA_NameInput:GetText()
+    -- default
+    local players = {
+        ['warrior'] = {},
+        ['paladin'] = {},
+        ['druid'] = {},
+        ['warlock'] = {},
+        ['mage'] = {},
+        ['priest'] = {},
+        ['rogue'] = {},
+        ['shaman'] = {},
+        ['hunter'] = {},
+        ['tanks'] = {},
+        ['tank'] = {},
+        ['healers'] = {},
+        ['absence'] = {}
+    }
+    local signUpsSectionStart, signUpsSectionEnd = string.find(exampleJSONe, '"signUps":%s*%[')
+    local function isSubstringInString(substring, fullString)
+        print(substring .. "substring")
+        print(fullString .. "fullString")
+
+        local startPos, endPos = string.find(fullString, substring)
+        return startPos ~= nil
+    end
+    -- Check if 'signUps' section is found
+    if not signUpsSectionStart then
+        print("No 'signUps' section found in JSON.")
+        return players
+    end
+
+    local signUpsContent = string.sub(exampleJSONe, signUpsSectionEnd + 1)
+    local signUpsSectionEndIndex = string.find(signUpsContent, "%]")
+    local signUpsString = string.sub(signUpsContent, 1, signUpsSectionEndIndex - 1)
+
+    -- Loop through each player entry within 'signUps'
+    local i = 1
+    while true do
+        local playerStart, playerEnd = string.find(signUpsString, '{(.-)}', i)
+        if not playerStart then
+            break
+        end
+
+        local playerEntry = string.sub(signUpsString, playerStart + 1, playerEnd - 1)
+        print(playerEntry)
+        -- Extract name and class using 'find'
+        local nameStart, nameEnd = string.find(playerEntry, '"name":%s*"([^"]-)"')
+        local classEmoteIdStart, classEmoteIdEnd = string.find(playerEntry, '"roleEmoteId":%s*"([^"]-)"')
+
+        -- print(nameStart)
+        -- print(nameEnd)
+        -- Extract name and class using 'find'
+        -- local roleNameStart, roleNameEnd = string.find(playerEntry, '"roleName":%s*"([^"]-)"')
+        -- print(nameStart)
+        -- print(nameEnd)
+        local classStart, classEnd = string.find(playerEntry, '"className":%s*"([^"]-)"')
+        -- print(classStart)
+        -- print(classEnd)
+        if nameStart and classStart then
+            local name = string.sub(playerEntry, nameStart + 9, nameEnd - 1)
+            print(name .. " name")
+            -- local roleName = string.sub(playerEntry, roleNameStart + 13, roleNameEnd - 1)
+            -- print(roleName .. " roleName")
+            local class = string.sub(playerEntry, classStart + 14, classEnd - 1)
+            print(class .. " class")
+            local classEmoteId = ""
+            if classEmoteIdStart then
+                classEmoteId = string.sub(playerEntry, classEmoteIdStart + 17, classEmoteIdEnd - 1)
+            end
+
+            print(classEmoteId .. " class")
+            local stringy = string.lower(class)
+            print(stringy .. "djokica")
+            if isSubstringInString("bench", stringy) or isSubstringInString("absence", stringy) or
+                isSubstringInString("tentative", stringy) or isSubstringInString("late", stringy) then
+                local f = 0
+            else
+                if stringy == "tank" or stringy == "tanks" or stringy == "melee" then
+                    stringy = "warrior"
+                end
+                if classEmoteId == "580801859221192714" then
+                    stringy = "warrior"
+                end
+                if classEmoteId == "580801859221192714" then
+                    stringy = "warrior"
+                end
+                if classEmoteId == "580801859221192714" then
+                    stringy = "warrior"
+                end
+                print('nisam uso')
+                -- Check if name already exists in TWA.raid[unitClass]
+                local exists = false
+                for _, existingName in ipairs(TWA.raid[stringy]) do
+                    if existingName == name then
+                        exists = true
+                        break
+                    end
+                end
+
+                -- Add name to the table only if it doesn't exist
+                if not exists then
+                    table.insert(TWA.raid[stringy], name)
+                    table.sort(TWA.raid[stringy])
+                end
+
+                TWA_RAID = TWA.raid
+                -- table.insert(TWA.raid[stringy], name)
+            end
+        end
+
+        i = playerEnd + 1 -- move to the next player entry
+    end
+
+    return players
+end
+
+-- Example usage
+exampleJSON = [[
+    {
+        "date": "16-1-2025",
+        "signUps": [
+            {
+                "entryTime": 1736553031,
+                "specName": "Protection",
+                "name": "Thomse",
+                "roleName": "Tanks",
+                "roleEmoteId": "598989638098747403",
+                "className": "Tank",
+                "specEmoteId": "637564444834136065",
+                "id": 279333517,
+                "position": 16,
+                "classEmoteId": "580801859221192714",
+                "userId": "214110532901273610",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736533085,
+                "specName": "Combat",
+                "name": "Ugglan",
+                "roleName": "Melee",
+                "roleEmoteId": "734439523328720913",
+                "className": "Rogue",
+                "specEmoteId": "637564352333086720",
+                "id": 279283654,
+                "position": 10,
+                "classEmoteId": "579532030086217748",
+                "userId": "143374282590912513",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736929780,
+                "specName": "Discipline",
+                "name": "Zuley",
+                "roleName": "Healers",
+                "roleEmoteId": "592438128057253898",
+                "className": "Priest",
+                "specEmoteId": "637564323442720768",
+                "id": 280077219,
+                "position": 37,
+                "classEmoteId": "579532029901799437",
+                "userId": "304371888753475584",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736972048,
+                "specName": "Arms",
+                "name": "Eleanthe",
+                "roleName": "Melee",
+                "roleEmoteId": "734439523328720913",
+                "className": "Bench",
+                "specEmoteId": "637564445031399474",
+                "id": 280165658,
+                "position": 45,
+                "classEmoteId": "612373441051361353",
+                "userId": "588012270714355715",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736530866,
+                "specName": "Guardian",
+                "name": "Fitzherbert",
+                "roleName": "Tanks",
+                "roleEmoteId": "598989638098747403",
+                "className": "Tank",
+                "specEmoteId": "637564171696734209",
+                "id": 279277296,
+                "position": 4,
+                "classEmoteId": "580801859221192714",
+                "userId": "295082592162807808",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736530433,
+                "specName": "Combat",
+                "name": "Sabetha/Artina",
+                "roleName": "Melee",
+                "roleEmoteId": "734439523328720913",
+                "className": "Rogue",
+                "specEmoteId": "637564352333086720",
+                "id": 279276065,
+                "position": 1,
+                "classEmoteId": "579532030086217748",
+                "userId": "492419453544431626",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736538829,
+                "specName": "Marksmanship",
+                "name": "Qibby",
+                "roleName": "Ranged",
+                "roleEmoteId": "592446395596931072",
+                "className": "Hunter",
+                "specEmoteId": "637564202084466708",
+                "id": 279298287,
+                "position": 11,
+                "classEmoteId": "579532029880827924",
+                "userId": "172418978419965952",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736761502,
+                "specName": "Affliction",
+                "name": "Semirhage",
+                "roleName": "Ranged",
+                "roleEmoteId": "592446395596931072",
+                "className": "Warlock",
+                "specEmoteId": "637564406984867861",
+                "id": 279719784,
+                "position": 30,
+                "classEmoteId": "579532029851336716",
+                "userId": "239124288345473024",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736531839,
+                "specName": "Fury",
+                "name": "Vespera/worstshifter",
+                "roleName": "Melee",
+                "roleEmoteId": "734439523328720913",
+                "className": "Warrior",
+                "specEmoteId": "637564445215948810",
+                "id": 279279915,
+                "position": 8,
+                "classEmoteId": "579532030153588739",
+                "userId": "301251358000939008",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736531685,
+                "specName": "Fire",
+                "name": "Naenia/Marleef",
+                "roleName": "Ranged",
+                "roleEmoteId": "592446395596931072",
+                "className": "Mage",
+                "specEmoteId": "637564231239073802",
+                "id": 279279452,
+                "position": 7,
+                "classEmoteId": "579532030161977355",
+                "userId": "419885712570187776",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736789416,
+                "specName": "Marksmanship",
+                "name": "Focus",
+                "roleName": "Ranged",
+                "roleEmoteId": "592446395596931072",
+                "className": "Hunter",
+                "specEmoteId": "637564202084466708",
+                "id": 279784245,
+                "position": 33,
+                "classEmoteId": "579532029880827924",
+                "userId": "194578180856610816",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736600306,
+                "specName": "Fury",
+                "name": "Jip",
+                "roleName": "Melee",
+                "roleEmoteId": "734439523328720913",
+                "className": "Warrior",
+                "specEmoteId": "637564445215948810",
+                "id": 279394998,
+                "position": 23,
+                "classEmoteId": "579532030153588739",
+                "userId": "509703466336124941",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736657527,
+                "specName": "Holy",
+                "name": "Lemaitre",
+                "roleName": "Healers",
+                "roleEmoteId": "592438128057253898",
+                "className": "Priest",
+                "specEmoteId": "637564323530539019",
+                "id": 279510826,
+                "position": 27,
+                "classEmoteId": "579532029901799437",
+                "userId": "763350572266815508",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736591253,
+                "specName": "Retribution",
+                "name": "Danuvius",
+                "roleName": "Melee",
+                "roleEmoteId": "734439523328720913",
+                "className": "Paladin",
+                "specEmoteId": "637564297953673216",
+                "id": 279380370,
+                "position": 20,
+                "classEmoteId": "579532029906124840",
+                "userId": "817723940288987186",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736531417,
+                "name": "Angrycat/Kazashka",
+                "className": "Absence",
+                "id": 279794345,
+                "position": 6,
+                "classEmoteId": "612343589070045200",
+                "userId": "124130266997325825",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736988458,
+                "name": "Demonique",
+                "className": "Bench",
+                "id": 280210890,
+                "position": 48,
+                "classEmoteId": "612373441051361353",
+                "userId": "1060477315718590494",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736989776,
+                "specName": "Shadow",
+                "name": "Eludaria",
+                "roleName": "Ranged",
+                "roleEmoteId": "592446395596931072",
+                "className": "Priest",
+                "specEmoteId": "637564323291725825",
+                "id": 280212892,
+                "position": 49,
+                "classEmoteId": "579532029901799437",
+                "userId": "1205986190503710820",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736555859,
+                "specName": "Arcane",
+                "name": "Lauryn/Aurwen/Balgruuf",
+                "roleName": "Ranged",
+                "roleEmoteId": "592446395596931072",
+                "className": "Mage",
+                "specEmoteId": "637564231545389056",
+                "id": 279338736,
+                "position": 17,
+                "classEmoteId": "579532030161977355",
+                "userId": "425884920129257472",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736602232,
+                "specName": "Marksmanship",
+                "name": "Reelix",
+                "roleName": "Ranged",
+                "roleEmoteId": "592446395596931072",
+                "className": "Hunter",
+                "specEmoteId": "637564202084466708",
+                "id": 279398656,
+                "position": 24,
+                "classEmoteId": "579532029880827924",
+                "userId": "134356130343288833",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736618979,
+                "name": "mystt/disari",
+                "className": "Absence",
+                "id": 279438000,
+                "position": 25,
+                "classEmoteId": "612343589070045200",
+                "userId": "551184927069306880",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736582877,
+                "specName": "Restoration",
+                "name": "Unomat",
+                "roleName": "Healers",
+                "roleEmoteId": "592438128057253898",
+                "className": "Druid",
+                "specEmoteId": "637564172007112723",
+                "id": 279370561,
+                "position": 19,
+                "classEmoteId": "579532029675438081",
+                "userId": "679471066237763584",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736947808,
+                "specName": "Fury",
+                "name": "Mini",
+                "roleName": "Melee",
+                "roleEmoteId": "734439523328720913",
+                "className": "Warrior",
+                "specEmoteId": "637564445215948810",
+                "id": 280103363,
+                "position": 41,
+                "classEmoteId": "579532030153588739",
+                "userId": "1180905852153102428",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736621721,
+                "specName": "Marksmanship",
+                "name": "Papacita",
+                "roleName": "Ranged",
+                "roleEmoteId": "592446395596931072",
+                "className": "Hunter",
+                "specEmoteId": "637564202084466708",
+                "id": 279445455,
+                "position": 26,
+                "classEmoteId": "579532029880827924",
+                "userId": "268224456076296193",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736546306,
+                "specName": "Fury",
+                "name": "RamseBamse",
+                "roleName": "Melee",
+                "roleEmoteId": "734439523328720913",
+                "className": "Warrior",
+                "specEmoteId": "637564445215948810",
+                "id": 279317251,
+                "position": 14,
+                "classEmoteId": "579532030153588739",
+                "userId": "277088999397523457",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736531395,
+                "specName": "Frost",
+                "name": "Trovi",
+                "roleName": "Ranged",
+                "roleEmoteId": "592446395596931072",
+                "className": "Mage",
+                "specEmoteId": "637564231469891594",
+                "id": 279278646,
+                "position": 5,
+                "classEmoteId": "579532030161977355",
+                "userId": "167370576522903553",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736719291,
+                "specName": "Fury",
+                "name": "Alaba(Andros)",
+                "roleName": "Melee",
+                "roleEmoteId": "734439523328720913",
+                "className": "Warrior",
+                "specEmoteId": "637564445215948810",
+                "id": 279644428,
+                "position": 28,
+                "classEmoteId": "579532030153588739",
+                "userId": "612386327627038730",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1737012231,
+                "name": "Ordoreductor",
+                "className": "Absence",
+                "id": 280242725,
+                "position": 50,
+                "classEmoteId": "612343589070045200",
+                "userId": "1088805414122045480",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736932367,
+                "specName": "Combat",
+                "name": "Bootybaker",
+                "roleName": "Melee",
+                "roleEmoteId": "734439523328720913",
+                "className": "Rogue",
+                "specEmoteId": "637564352333086720",
+                "id": 280080229,
+                "position": 38,
+                "classEmoteId": "579532030086217748",
+                "userId": "513705951811862539",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736530843,
+                "specName": "Holy1",
+                "name": "Zua",
+                "roleName": "Healers",
+                "roleEmoteId": "592438128057253898",
+                "className": "Paladin",
+                "specEmoteId": "637564297622454272",
+                "id": 279277234,
+                "position": 3,
+                "classEmoteId": "579532029906124840",
+                "userId": "231420271481847809",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736752617,
+                "specName": "Retribution",
+                "name": "Regalius",
+                "roleName": "Melee",
+                "roleEmoteId": "734439523328720913",
+                "className": "Paladin",
+                "specEmoteId": "637564297953673216",
+                "id": 279706675,
+                "position": 29,
+                "classEmoteId": "579532029906124840",
+                "userId": "321677711452143627",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736546756,
+                "specName": "Guardian",
+                "name": "Carexi",
+                "roleName": "Tanks",
+                "roleEmoteId": "598989638098747403",
+                "className": "Tank",
+                "specEmoteId": "637564171696734209",
+                "id": 279318778,
+                "position": 15,
+                "classEmoteId": "580801859221192714",
+                "userId": "213377297879793665",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736938082,
+                "specName": "Protection1",
+                "name": "Kysu",
+                "roleName": "Tanks",
+                "roleEmoteId": "598989638098747403",
+                "className": "Tank",
+                "specEmoteId": "637564297647489034",
+                "id": 280087660,
+                "position": 40,
+                "classEmoteId": "580801859221192714",
+                "userId": "445386709254012929",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736545010,
+                "name": "Lin/Bear/Winissa",
+                "className": "Absence",
+                "id": 279313767,
+                "position": 13,
+                "classEmoteId": "612343589070045200",
+                "userId": "1057781085221695621",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736959557,
+                "specName": "Guardian",
+                "name": "aszune",
+                "roleName": "Tanks",
+                "roleEmoteId": "598989638098747403",
+                "className": "Tank",
+                "specEmoteId": "637564171696734209",
+                "id": 280130002,
+                "position": 43,
+                "classEmoteId": "580801859221192714",
+                "userId": "1140261613723725886",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736580167,
+                "specName": "Holy",
+                "name": "Cancel",
+                "roleName": "Healers",
+                "roleEmoteId": "592438128057253898",
+                "className": "Priest",
+                "specEmoteId": "637564323530539019",
+                "id": 279368056,
+                "position": 18,
+                "classEmoteId": "579532029901799437",
+                "userId": "136609471106383872",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736932839,
+                "specName": "Balance",
+                "name": "Frunzuliță",
+                "roleName": "Ranged",
+                "roleEmoteId": "592446395596931072",
+                "className": "Druid",
+                "specEmoteId": "637564171994529798",
+                "id": 280080856,
+                "position": 39,
+                "classEmoteId": "579532029675438081",
+                "userId": "324585952662126592",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736775930,
+                "specName": "Holy1",
+                "name": "Kirminas",
+                "roleName": "Healers",
+                "roleEmoteId": "592438128057253898",
+                "className": "Paladin",
+                "specEmoteId": "637564297622454272",
+                "id": 279746657,
+                "position": 31,
+                "classEmoteId": "579532029906124840",
+                "userId": "269910755929882624",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736897556,
+                "specName": "Marksmanship",
+                "name": "Sundre/Nerys",
+                "roleName": "Ranged",
+                "roleEmoteId": "592446395596931072",
+                "className": "Hunter",
+                "specEmoteId": "637564202084466708",
+                "id": 280028226,
+                "position": 36,
+                "classEmoteId": "579532029880827924",
+                "userId": "161475359970164736",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736980391,
+                "specName": "Fury",
+                "name": "Soup",
+                "roleName": "Melee",
+                "roleEmoteId": "734439523328720913",
+                "className": "Warrior",
+                "specEmoteId": "637564445215948810",
+                "id": 280193236,
+                "position": 47,
+                "classEmoteId": "579532030153588739",
+                "userId": "426898916743839765",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736975982,
+                "name": "Bibingka/Zanzuro",
+                "className": "Absence",
+                "id": 280178190,
+                "position": 46,
+                "classEmoteId": "612343589070045200",
+                "userId": "473201644906086402",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736544836,
+                "specName": "Marksmanship",
+                "name": "Cipisek",
+                "roleName": "Ranged",
+                "roleEmoteId": "592446395596931072",
+                "className": "Hunter",
+                "specEmoteId": "637564202084466708",
+                "id": 279313324,
+                "position": 12,
+                "classEmoteId": "579532029880827924",
+                "userId": "290041449649668096",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736791854,
+                "specName": "Holy1",
+                "name": "Leilana/Mystriel/Sarella",
+                "roleName": "Healers",
+                "roleEmoteId": "592438128057253898",
+                "className": "Paladin",
+                "specEmoteId": "637564297622454272",
+                "id": 279792257,
+                "position": 34,
+                "classEmoteId": "579532029906124840",
+                "userId": "215440571651588097",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736952814,
+                "specName": "Frost",
+                "name": "Chillz",
+                "roleName": "Ranged",
+                "roleEmoteId": "592446395596931072",
+                "className": "Mage",
+                "specEmoteId": "637564231469891594",
+                "id": 280113198,
+                "position": 42,
+                "classEmoteId": "579532030161977355",
+                "userId": "613382175747735552",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736787270,
+                "specName": "Restoration",
+                "name": "Mooshie",
+                "roleName": "Healers",
+                "roleEmoteId": "592438128057253898",
+                "className": "Druid",
+                "specEmoteId": "637564172007112723",
+                "id": 279777162,
+                "position": 32,
+                "classEmoteId": "579532029675438081",
+                "userId": "214442676689305602",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736883375,
+                "specName": "Retribution",
+                "name": "Rovanir",
+                "roleName": "Melee",
+                "roleEmoteId": "734439523328720913",
+                "className": "Late",
+                "specEmoteId": "637564297953673216",
+                "id": 279988972,
+                "position": 35,
+                "classEmoteId": "612373443551297689",
+                "userId": "222761984733478912",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736594256,
+                "specName": "Protection1",
+                "name": "Reyner",
+                "roleName": "Tanks",
+                "roleEmoteId": "598989638098747403",
+                "className": "Tank",
+                "specEmoteId": "637564297647489034",
+                "id": 279384703,
+                "position": 21,
+                "classEmoteId": "580801859221192714",
+                "userId": "217990934686597122",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736532354,
+                "name": "Gankorr",
+                "className": "Absence",
+                "id": 279281517,
+                "position": 9,
+                "classEmoteId": "612343589070045200",
+                "userId": "377540774021038082",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736968266,
+                "specName": "Arcane",
+                "name": "Solerina",
+                "roleName": "Ranged",
+                "roleEmoteId": "592446395596931072",
+                "className": "Mage",
+                "specEmoteId": "637564231545389056",
+                "id": 280155617,
+                "position": 44,
+                "classEmoteId": "579532030161977355",
+                "userId": "182973663211945984",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736598686,
+                "name": "Elferina",
+                "className": "Absence",
+                "id": 279392613,
+                "position": 22,
+                "classEmoteId": "612343589070045200",
+                "userId": "252532144398794753",
+                "status": "primary"
+            },
+            {
+                "entryTime": 1736530455,
+                "specName": "Holy",
+                "name": "Lirya",
+                "roleName": "Healers",
+                "roleEmoteId": "592438128057253898",
+                "className": "Priest",
+                "specEmoteId": "637564323530539019",
+                "id": 279276118,
+                "position": 2,
+                "classEmoteId": "579532029901799437",
+                "userId": "368935111434960896",
+                "status": "primary"
+            }
+        ],
+        "color": "209,211,57",
+        "classes": [
+            {
+                "specs": [
+                    {
+                        "name": "Protection",
+                        "roleName": "Tanks",
+                        "roleEmoteId": "598989638098747403",
+                        "emoteId": "637564444834136065"
+                    },
+                    {
+                        "name": "Protection1",
+                        "roleName": "Tanks",
+                        "roleEmoteId": "598989638098747403",
+                        "emoteId": "637564297647489034"
+                    },
+                    {
+                        "name": "Guardian",
+                        "roleName": "Tanks",
+                        "roleEmoteId": "598989638098747403",
+                        "emoteId": "637564171696734209"
+                    }
+                ],
+                "name": "Tank",
+                "limit": 999,
+                "emoteId": "580801859221192714",
+                "type": "primary"
+            },
+            {
+                "specs": [
+                    {
+                        "name": "Arms",
+                        "roleName": "Melee",
+                        "roleEmoteId": "734439523328720913",
+                        "emoteId": "637564445031399474"
+                    },
+                    {
+                        "name": "Fury",
+                        "roleName": "Melee",
+                        "roleEmoteId": "734439523328720913",
+                        "emoteId": "637564445215948810"
+                    },
+                    {
+                        "name": "Protection",
+                        "roleName": "Tanks",
+                        "roleEmoteId": "598989638098747403",
+                        "emoteId": "637564444834136065"
+                    }
+                ],
+                "name": "Warrior",
+                "limit": 999,
+                "emoteId": "579532030153588739",
+                "type": "primary"
+            },
+            {
+                "specs": [
+                    {
+                        "name": "Balance",
+                        "roleName": "Ranged",
+                        "roleEmoteId": "592446395596931072",
+                        "emoteId": "637564171994529798"
+                    },
+                    {
+                        "name": "Dreamstate",
+                        "roleName": "Healers",
+                        "roleEmoteId": "592438128057253898",
+                        "emoteId": "982381290663866468"
+                    },
+                    {
+                        "name": "Feral",
+                        "roleName": "Melee",
+                        "roleEmoteId": "734439523328720913",
+                        "emoteId": "637564172061900820"
+                    },
+                    {
+                        "name": "Restoration",
+                        "roleName": "Healers",
+                        "roleEmoteId": "592438128057253898",
+                        "emoteId": "637564172007112723"
+                    },
+                    {
+                        "name": "Guardian",
+                        "roleName": "Tanks",
+                        "roleEmoteId": "598989638098747403",
+                        "emoteId": "637564171696734209"
+                    }
+                ],
+                "name": "Druid",
+                "limit": 999,
+                "emoteId": "579532029675438081",
+                "type": "primary"
+            },
+            {
+                "specs": [
+                    {
+                        "name": "Holy1",
+                        "roleName": "Healers",
+                        "roleEmoteId": "592438128057253898",
+                        "emoteId": "637564297622454272"
+                    },
+                    {
+                        "name": "Protection1",
+                        "roleName": "Tanks",
+                        "roleEmoteId": "598989638098747403",
+                        "emoteId": "637564297647489034"
+                    },
+                    {
+                        "name": "Retribution",
+                        "roleName": "Melee",
+                        "roleEmoteId": "734439523328720913",
+                        "emoteId": "637564297953673216"
+                    }
+                ],
+                "name": "Paladin",
+                "limit": 999,
+                "emoteId": "579532029906124840",
+                "type": "primary"
+            },
+            {
+                "specs": [
+                    {
+                        "name": "Assassination",
+                        "roleName": "Melee",
+                        "roleEmoteId": "734439523328720913",
+                        "emoteId": "637564351707873324"
+                    },
+                    {
+                        "name": "Combat",
+                        "roleName": "Melee",
+                        "roleEmoteId": "734439523328720913",
+                        "emoteId": "637564352333086720"
+                    },
+                    {
+                        "name": "Subtlety",
+                        "roleName": "Melee",
+                        "roleEmoteId": "734439523328720913",
+                        "emoteId": "637564352169508892"
+                    }
+                ],
+                "name": "Rogue",
+                "limit": 999,
+                "emoteId": "579532030086217748",
+                "type": "primary"
+            },
+            {
+                "specs": [
+                    {
+                        "name": "Beastmastery",
+                        "roleName": "Ranged",
+                        "roleEmoteId": "592446395596931072",
+                        "emoteId": "637564202021814277"
+                    },
+                    {
+                        "name": "Marksmanship",
+                        "roleName": "Ranged",
+                        "roleEmoteId": "592446395596931072",
+                        "emoteId": "637564202084466708"
+                    },
+                    {
+                        "name": "Survival",
+                        "roleName": "Ranged",
+                        "roleEmoteId": "592446395596931072",
+                        "emoteId": "637564202130866186"
+                    }
+                ],
+                "name": "Hunter",
+                "limit": 999,
+                "emoteId": "579532029880827924",
+                "type": "primary"
+            },
+            {
+                "specs": [
+                    {
+                        "name": "Discipline",
+                        "roleName": "Healers",
+                        "roleEmoteId": "592438128057253898",
+                        "emoteId": "637564323442720768"
+                    },
+                    {
+                        "name": "Holy",
+                        "roleName": "Healers",
+                        "roleEmoteId": "592438128057253898",
+                        "emoteId": "637564323530539019"
+                    },
+                    {
+                        "name": "Shadow",
+                        "roleName": "Ranged",
+                        "roleEmoteId": "592446395596931072",
+                        "emoteId": "637564323291725825"
+                    },
+                    {
+                        "name": "Smite",
+                        "roleName": "Ranged",
+                        "roleEmoteId": "592446395596931072",
+                        "emoteId": "887257034066653184"
+                    }
+                ],
+                "name": "Priest",
+                "limit": 999,
+                "emoteId": "579532029901799437",
+                "type": "primary"
+            },
+            {
+                "specs": [
+                    {
+                        "name": "Arcane",
+                        "roleName": "Ranged",
+                        "roleEmoteId": "592446395596931072",
+                        "emoteId": "637564231545389056"
+                    },
+                    {
+                        "name": "Fire",
+                        "roleName": "Ranged",
+                        "roleEmoteId": "592446395596931072",
+                        "emoteId": "637564231239073802"
+                    },
+                    {
+                        "name": "Frost",
+                        "roleName": "Ranged",
+                        "roleEmoteId": "592446395596931072",
+                        "emoteId": "637564231469891594"
+                    }
+                ],
+                "name": "Mage",
+                "limit": 999,
+                "emoteId": "579532030161977355",
+                "type": "primary"
+            },
+            {
+                "specs": [
+                    {
+                        "name": "Affliction",
+                        "roleName": "Ranged",
+                        "roleEmoteId": "592446395596931072",
+                        "emoteId": "637564406984867861"
+                    },
+                    {
+                        "name": "Demonology",
+                        "roleName": "Ranged",
+                        "roleEmoteId": "592446395596931072",
+                        "emoteId": "637564407001513984"
+                    },
+                    {
+                        "name": "Destruction",
+                        "roleName": "Ranged",
+                        "roleEmoteId": "592446395596931072",
+                        "emoteId": "637564406682877964"
+                    }
+                ],
+                "name": "Warlock",
+                "limit": 999,
+                "emoteId": "579532029851336716",
+                "type": "primary"
+            },
+            {
+                "specs": [
+                    {
+                        "name": "Elemental",
+                        "roleName": "Ranged",
+                        "roleEmoteId": "592446395596931072",
+                        "emoteId": "637564379595931649"
+                    },
+                    {
+                        "name": "Enhancement",
+                        "roleName": "Melee",
+                        "roleEmoteId": "734439523328720913",
+                        "emoteId": "637564379772223489"
+                    },
+                    {
+                        "name": "Restoration1",
+                        "roleName": "Healers",
+                        "roleEmoteId": "592438128057253898",
+                        "emoteId": "637564379847458846"
+                    }
+                ],
+                "name": "Shaman",
+                "limit": 999,
+                "emoteId": "579532030056857600",
+                "type": "primary"
+            },
+            {
+                "specs": [],
+                "name": "Late",
+                "limit": 999,
+                "emoteId": "612373443551297689",
+                "type": "default",
+                "effectiveName": "Late"
+            },
+            {
+                "specs": [],
+                "name": "Bench",
+                "limit": 999,
+                "emoteId": "612373441051361353",
+                "type": "default",
+                "effectiveName": "Bench"
+            },
+            {
+                "specs": [],
+                "name": "Tentative",
+                "limit": 999,
+                "emoteId": "676284492754976788",
+                "type": "default",
+                "effectiveName": "Tentative"
+            },
+            {
+                "specs": [],
+                "name": "Absence",
+                "limit": 999,
+                "emoteId": "612343589070045200",
+                "type": "default",
+                "effectiveName": "Absence"
+            }
+        ],
+        "roles": [
+            {
+                "name": "Tanks",
+                "limit": 999,
+                "emoteId": "598989638098747403"
+            },
+            {
+                "name": "Melee",
+                "limit": 999,
+                "emoteId": "734439523328720913"
+            },
+            {
+                "name": "Ranged",
+                "limit": 999,
+                "emoteId": "592446395596931072"
+            },
+            {
+                "name": "Healers",
+                "limit": 999,
+                "emoteId": "592438128057253898"
+            }
+        ],
+        "description": "lets get people for Naxx",
+        "channelType": "text",
+        "title": "Thursday Raid Night",
+        "templateId": "2",
+        "serverId": "1202716230163890226",
+        "leaderId": "368935111434960896",
+        "lastUpdated": 1737012231,
+        "displayTitle": "Thursday Raid Night",
+        "closingTime": 1737052200,
+        "leaderName": "Lirya",
+        "advancedSettings": {
+            "temp_voicechannel": "false",
+            "limit_per_user": 1,
+            "date1_emote": "1124529967611523272",
+            "tentative_emote": "782549546210951188",
+            "apply_unregister": true,
+            "show_content": true,
+            "countdown2_emote": "593930235658108939",
+            "event_type": "interaction",
+            "deletion": "false",
+            "limit": 9999,
+            "mention_mode": false,
+            "signups1_emote": "1124529971428339752",
+            "bench_overflow": true,
+            "show_emotes": true,
+            "banned_roles": "none",
+            "image": "none",
+            "thumbnail": "none",
+            "show_footer": true,
+            "apply_specreset": true,
+            "disable_reason": true,
+            "allow_duplicate": false,
+            "forum_tags": "Event",
+            "show_classes": false,
+            "alt_names": false,
+            "time2_emote": "593930235658108939",
+            "preserve_order": "normal",
+            "force_reminders": "false",
+            "show_title": true,
+            "leader_emote": "1124529969926779050",
+            "mentions": "none",
+            "show_info": true,
+            "late_emote": "612373443551297689",
+            "create_discordevent": false,
+            "show_counter": true,
+            "show_banned": false,
+            "bench_emote": "612373441051361353",
+            "lower_limit": 0,
+            "opt_out": "none",
+            "color": "#d1d339",
+            "use_nicknames": true,
+            "info_variant": "short",
+            "show_on_overview": true,
+            "voice_channel": "none",
+            "duration": 180,
+            "pin_message": false,
+            "create_thread": "True",
+            "spec_saving": true,
+            "vacuum": true,
+            "time1_emote": "1124529972883767398",
+            "defaults_pre_req": false,
+            "deadline": "0",
+            "horizontal_mode": false,
+            "show_countdown": true,
+            "date2_emote": "593930359985405983",
+            "reminder": "false",
+            "mention_leader": false,
+            "bold_all": true,
+            "show_leader": true,
+            "font_style": "1",
+            "signups2_emote": "593930418932285440",
+            "temp_role": "false",
+            "allowed_roles": "none",
+            "queue_bench": false,
+            "show_roles": true,
+            "date_variant": "both",
+            "response": "none",
+            "lock_at_limit": true,
+            "disable_archiving": false,
+            "countdown1_emote": "1124530049329139772",
+            "absence_emote": "612343589070045200",
+            "show_numbering": true,
+            "show_allowed": false,
+            "delete_thread": false,
+            "attendance": "false"
+        },
+        "startTime": 1737052200,
+        "channelName": "thursday-raid",
+        "id": "1327329383844675614",
+        "time": "19:30",
+        "endTime": 1737063000,
+        "channelId": "1211410880173187104"
+    }
+]]
+
+-- parsedPlayers = parsePlayersFromJSON(exampleJSON)
 
 -- REYNER TEST
 -- Remove a single raider by name
@@ -1525,7 +2767,6 @@ function buildTanksDropdown()
             ['key'] = 'shaman'
         }
         UIDropDownMenu_AddButton(Shamans, UIDROPDOWNMENU_MENU_LEVEL);
-
         local separator = {};
         separator.text = ""
         separator.disabled = true
@@ -1835,6 +3076,10 @@ end
 
 -- REYNER TEST
 function toggle_TWA_Main()
+    -- -- Output the parsed player data
+    -- for _, player in ipairs(parsedPlayers) do
+    --     print("Player Name:", player.name, "Class:", player.class)
+    -- end
     TWA_ManualRaiderFrame:ClearAllPoints()
     TWA_ManualRaiderFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
     if (getglobal('TWA_ManualRaiderFrame'):IsVisible()) then

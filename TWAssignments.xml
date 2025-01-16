@@ -1,5 +1,5 @@
-<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
+<Ui xmlns="http://www.blizzard.com/wow/ui/"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
 	<Script file="TWAssignments.lua" />
 	<Frame name="TWRow" virtual="true">
 		<Size>
@@ -48,8 +48,7 @@
 		</Backdrop>
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString name="$parentText" inherits="GameFontNormal" text="----------"
-					hidden="false">
+				<FontString name="$parentText" inherits="GameFontNormal" text="----------" hidden="false">
 					<Anchors>
 						<Anchor point="LEFT">
 							<Offset>
@@ -58,8 +57,7 @@
 						</Anchor>
 					</Anchors>
 				</FontString>
-				<Texture name="$parentIcon" file="Interface\addons\TWLC2\images\green-check"
-					hidden="false">
+				<Texture name="$parentIcon" file="Interface\addons\TWLC2\images\green-check" hidden="false">
 					<Size>
 						<AbsDimension x="12" y="12" />
 					</Size>
@@ -102,16 +100,14 @@
 			</Button>
 		</Frames>
 	</Frame>
-	<Frame name="TWA_Main" hidden="true" toplevel="true" parent="UIParent" movable="true"
-		enableMouse="true" resizable="false">
+	<Frame name="TWA_Main" hidden="true" toplevel="true" parent="UIParent" movable="true" enableMouse="true" resizable="false">
 		<Size>
 			<AbsDimension x="605" y="100" />
 		</Size>
 		<Anchors>
 			<Anchor point="CENTER" />
 		</Anchors>
-		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background"
-			edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="false">
+		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="false">
 			<BackgroundInsets>
 				<AbsInset left="2" right="2" top="3" bottom="3" />
 			</BackgroundInsets>
@@ -121,8 +117,7 @@
 		</Backdrop>
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString name="$parentText" inherits="GameFontNormal" text=" -- TARGET --"
-					hidden="false">
+				<FontString name="$parentText" inherits="GameFontNormal" text=" -- TARGET --" hidden="false">
 					<Anchors>
 						<Anchor point="TOPLEFT">
 							<Offset>
@@ -131,8 +126,7 @@
 						</Anchor>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentText" inherits="GameFontNormal"
-					text=" ----------------- TANKS -------------------" hidden="false">
+				<FontString name="$parentText" inherits="GameFontNormal" text=" ----------------- TANKS -------------------" hidden="false">
 					<Anchors>
 						<Anchor point="TOPLEFT">
 							<Offset>
@@ -141,8 +135,7 @@
 						</Anchor>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentText" inherits="GameFontNormal"
-					text="  -------------------- HEALERS ------------------" hidden="false">
+				<FontString name="$parentText" inherits="GameFontNormal" text="  -------------------- HEALERS ------------------" hidden="false">
 					<Anchors>
 						<Anchor point="TOPLEFT">
 							<Offset>
@@ -154,8 +147,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Button name="TWA_Minimap" movable="true" parent="UIParent" enableMouse="true"
-				toplevel="true" frameStrata="LOW">
+			<Button name="TWA_Minimap" movable="true" parent="UIParent" enableMouse="true" toplevel="true" frameStrata="LOW">
 				<Size x="33" y="33" />
 				<Anchors>
 					<Anchor point="CENTER" />
@@ -181,8 +173,7 @@
 						</Texture>
 					</Layer>
 				</Layers>
-				<HighlightTexture alphaMode="ADD"
-					file="Interface\Minimap\UI-Minimap-ZoomButton-Highlight" />
+				<HighlightTexture alphaMode="ADD" file="Interface\Minimap\UI-Minimap-ZoomButton-Highlight" />
 				<Scripts>
 					<OnLoad>
 						this:RegisterForClicks("RightButtonUp")
@@ -266,8 +257,7 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-			<Button name="$parentClearAssigns" inherits="UIPanelButtonTemplate2"
-				text="Clear Assignments">
+			<Button name="$parentClearAssigns" inherits="UIPanelButtonTemplate2" text="Clear Assignments">
 				<Size>
 					<AbsDimension x="90" y="20" />
 				</Size>
@@ -285,8 +275,7 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-			<Button name="$parentResetRaidNames" inherits="UIPanelButtonTemplate2"
-				text="Update Raid Names">
+			<Button name="$parentResetRaidNames" inherits="UIPanelButtonTemplate2" text="Update Raid Names">
 				<Size>
 					<AbsDimension x="100" y="20" />
 				</Size>
@@ -412,17 +401,14 @@
 			</OnMouseUp>
 		</Scripts>
 	</Frame>
-	<Frame name="TWA_ManualRaiderFrame" parent="UIParent" movable="true" clampedToScreen="true"
-		hidden="true" enableMouse="true">
+	<Frame name="TWA_ManualRaiderFrame" parent="UIParent" movable="true" clampedToScreen="true" hidden="true" enableMouse="true">
 		<Size>
 			<AbsDimension x="200" y="200" />
 		</Size>
 		<Anchors>
 			<Anchor point="CENTER" />
 		</Anchors>
-		<Backdrop bgFile="Interface\\Tooltips\\UI-Tooltip-Background"
-			edgeFile="Interface\\Tooltips\\UI-Tooltip-Border" tile="true" tileSize="16"
-			edgeSize="16">
+		<Backdrop bgFile="Interface\\Tooltips\\UI-Tooltip-Background" edgeFile="Interface\\Tooltips\\UI-Tooltip-Border" tile="true" tileSize="16" edgeSize="16">
 			<BackgroundInsets>
 				<AbsInset left="4" right="4" top="4" bottom="4" />
 			</BackgroundInsets>
@@ -505,8 +491,7 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-			<Button name="TWA_ResetRaidNames" inherits="UIPanelButtonTemplate"
-				text="Reset All Names">
+			<Button name="TWA_ResetRaidNames" inherits="UIPanelButtonTemplate" text="Reset All Names">
 				<Size>
 					<AbsDimension x="135" y="25" />
 				</Size>
@@ -520,6 +505,40 @@
 				<Scripts>
 					<OnClick>
 						fillRaidDataReset()
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="TWA_ResetRaidNames" inherits="UIPanelButtonTemplate" text="IMPORT FROM JSON">
+				<Size>
+					<AbsDimension x="135" y="25" />
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="13" y="-210" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						parsePlayersFromJSON()
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="TWA_ResetRaidNames" inherits="UIPanelButtonTemplate" text="IMPORT FROM RAID">
+				<Size>
+					<AbsDimension x="135" y="25" />
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="13" y="-240" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						parsePlayersFromRaid()
 					</OnClick>
 				</Scripts>
 			</Button>
