@@ -493,7 +493,7 @@ TWA:SetScript("OnEvent", function()
             TWA.raid = TWA_RAID
             TWA.data = TWA_DATA
             -- TWA.fillRaidDataCustom()
-            -- TWA.PopulateTWA()
+            TWA.PopulateTWA()
             tinsert(UISpecialFrames, "TWA_Main") -- makes window close with Esc key
             if (TWA.loadedTemplate ~= '') then
                 getglobal('TWA_MainTemplates'):SetText(TWA.loadedTemplate)
