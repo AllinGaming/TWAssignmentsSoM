@@ -724,8 +724,6 @@ function parsePlayersFromJSON()
     }
     local signUpsSectionStart, signUpsSectionEnd = string.find(exampleJSONe, '"signUps":%s*%[')
     local function isSubstringInString(substring, fullString)
-        print(substring .. "substring")
-        print(fullString .. "fullString")
 
         local startPos, endPos = string.find(fullString, substring)
         return startPos ~= nil
@@ -749,11 +747,10 @@ function parsePlayersFromJSON()
         end
 
         local playerEntry = string.sub(signUpsString, playerStart + 1, playerEnd - 1)
-        print(playerEntry)
+        -- print(playerEntry)
         -- Extract name and class using 'find'
         local nameStart, nameEnd = string.find(playerEntry, '"name":%s*"([^"]-)"')
-        local classEmoteIdStart, classEmoteIdEnd = string.find(playerEntry, '"roleEmoteId":%s*"([^"]-)"')
-
+        local classEmoteIdStart, classEmoteIdEnd = string.find(playerEntry, '"specEmoteId":%s*"([^"]-)"')
         -- print(nameStart)
         -- print(nameEnd)
         -- Extract name and class using 'find'
@@ -763,21 +760,22 @@ function parsePlayersFromJSON()
         local classStart, classEnd = string.find(playerEntry, '"className":%s*"([^"]-)"')
         -- print(classStart)
         -- print(classEnd)
-        if nameStart and classStart then
+        if nameStart and classStart and classEmoteIdStart then
             local name = string.sub(playerEntry, nameStart + 9, nameEnd - 1)
-            print(name .. " name")
+            -- print(name .. " name")
             -- local roleName = string.sub(playerEntry, roleNameStart + 13, roleNameEnd - 1)
             -- print(roleName .. " roleName")
+
             local class = string.sub(playerEntry, classStart + 14, classEnd - 1)
-            print(class .. " class")
+            -- print(class .. " class")
             local classEmoteId = ""
             if classEmoteIdStart then
-                classEmoteId = string.sub(playerEntry, classEmoteIdStart + 17, classEmoteIdEnd - 1)
+                classEmoteId = string.sub(playerEntry, classEmoteIdStart + 16, classEmoteIdEnd - 1)
             end
 
-            print(classEmoteId .. " class")
+            -- print(classEmoteId .. " class")
             local stringy = string.lower(class)
-            print(stringy .. "djokica")
+            -- print(stringy .. "djokica")
             if isSubstringInString("bench", stringy) or isSubstringInString("absence", stringy) or
                 isSubstringInString("tentative", stringy) or isSubstringInString("late", stringy) then
                 local f = 0
@@ -785,16 +783,15 @@ function parsePlayersFromJSON()
                 if stringy == "tank" or stringy == "tanks" or stringy == "melee" then
                     stringy = "warrior"
                 end
-                if classEmoteId == "580801859221192714" then
+                if classEmoteId == "637564444834136065" then
                     stringy = "warrior"
                 end
-                if classEmoteId == "580801859221192714" then
-                    stringy = "warrior"
+                if classEmoteId == "637564297647489034" then
+                    stringy = "paladin"
                 end
-                if classEmoteId == "580801859221192714" then
-                    stringy = "warrior"
+                if classEmoteId == "637564171696734209" then
+                    stringy = "druid"
                 end
-                print('nisam uso')
                 -- Check if name already exists in TWA.raid[unitClass]
                 local exists = false
                 for _, existingName in ipairs(TWA.raid[stringy]) do
@@ -3586,7 +3583,6 @@ function SyncBW_OnClick()
 
     -- Sync TWA.raid data
     ChatThrottleLib:SendAddonMessage("ALERT", "TWABW", "BWSynchRaid=start", "RAID")
-    print("sendingmsgRaid")
     for class, players in pairs(TWA.raid) do
         if table.getn(players) > 0 then
             local playerList = table.concat(players, ", ")
