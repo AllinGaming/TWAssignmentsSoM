@@ -762,6 +762,15 @@ function parsePlayersFromJSON()
         -- print(classEnd)
         if nameStart and classStart and classEmoteIdStart then
             local name = string.sub(playerEntry, nameStart + 9, nameEnd - 1)
+            -- Find the position of the first "/"
+            local start_pos = string.find(name, "/")
+
+            -- If "/" is not found, use the entire string
+            if start_pos then
+                name = string.sub(name, 1, start_pos - 1)
+            else
+                name = name
+            end
             -- print(name .. " name")
             -- local roleName = string.sub(playerEntry, roleNameStart + 13, roleNameEnd - 1)
             -- print(roleName .. " roleName")
