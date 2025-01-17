@@ -288,6 +288,11 @@ function TWA.loadTemplate(template, load)
         for i, d in next, twa_templates[template] do
             TWA.data[i] = d
         end
+        if TWA_PRESETS[template] then
+            for e, f in next, TWA_PRESETS[template] do
+                TWA.data[e] = f
+            end
+        end
         TWA.PopulateTWA()
         twaprint('Loaded template |cff69ccf0' .. template)
         getglobal('TWA_MainTemplates'):SetText(template)
@@ -412,6 +417,7 @@ TWA.sides = {
     -- if changed also change in buildTargetsDropdown !
     ['Left'] = TWA.classColors['warlock'].c,
     ['Right'] = TWA.classColors['mage'].c,
+    ['Middle'] = TWA.classColors['paladin'].c,
     ['Entrance'] = TWA.classColors['priest'].c,
     ['Exit'] = TWA.classColors['rogue'].c,
     ['Far'] = TWA.classColors['hunter'].c,
@@ -2558,6 +2564,14 @@ function buildTargetsDropdown()
             entrance.arg1 = TWA.currentRow * 100 + TWA.currentCell
             entrance.arg2 = 'Entrance'
             UIDropDownMenu_AddButton(entrance, UIDROPDOWNMENU_MENU_LEVEL);
+
+            local middle = {};
+            middle.text = TWA.sides['Middle'] .. 'Middle'
+            middle.checked = TWA.markOrPlayerUsed('Middle')
+            middle.func = TWA.changeCell
+            middle.arg1 = TWA.currentRow * 100 + TWA.currentCell
+            middle.arg2 = 'Middle'
+            UIDropDownMenu_AddButton(middle, UIDROPDOWNMENU_MENU_LEVEL);
 
             local exit = {};
             exit.text = TWA.sides['Exit'] .. 'Exit'
