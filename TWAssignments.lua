@@ -277,6 +277,14 @@ local twa_templates = {
     ['kt'] = {
         [1] = {"BOSS", "-", "-", "-", "-", "-", "-"},
         [2] = {"Raid", "-", "-", "-", "-", "-", "-"}
+    },
+    ['erenius'] = {
+        [1] = {"BOSS", "-", "-", "-", "-", "-", "-"},
+        [2] = {"Left", "-", "-", "-", "-", "-", "-"},
+        [3] = {"Middle", "-", "-", "-", "-", "-", "-"},
+        [4] = {"Right", "-", "-", "-", "-", "-", "-"},
+        [5] = {"Circle", "-", "-", "-", "-", "-", "-"}
+
     }
 
 }
@@ -288,11 +296,76 @@ function TWA.loadTemplate(template, load)
         for i, d in next, twa_templates[template] do
             TWA.data[i] = d
         end
-        if TWA_PRESETS[template] then
-            for e, f in next, TWA_PRESETS[template] do
-                TWA.data[e] = f
-            end
+        -- if TWA_PRESETS[template] then
+        --     for e, f in next, TWA_PRESETS[template] do
+        --         TWA.data[e] = f
+        --     end
+        -- end
+        -- for i, d in next, twa_templates[template] do
+        --     TWA.data[i] = d
+        -- end
+        -- local count = 0 -- Initialize counter
+        -- local last_d -- Variable to store the last good `d`
+        -- local last_index -- Variable to track the last key
+
+        -- for i, d in next, twa_templates[template] do
+        --     TWA.data[i] = d
+        --     last_d = d -- Update the last good `d`
+        --     last_index = i -- Track the last key
+        --     count = count + 1
+        --     if count >= 8 then
+        --         break
+        --     end
+        -- end
+
+        -- -- Fill remaining slots with an incremented version of `last_d`
+        -- while count < 8 do
+        --     last_index = (last_index or 1) + 1 -- Increment the last key or default to 1
+        --     TWA.data[last_index] = {"-", "-", "-", "-", "-", "-", "-"}
+        --     count = count + 1
+        -- end
+        TWA.PopulateTWA()
+        twaprint('Loaded template |cff69ccf0' .. template)
+        getglobal('TWA_MainTemplates'):SetText(template)
+        TWA.loadedTemplate = template
+        TWA_LOADED_TEMPLATE = template
+        return true
+    end
+    -- SyncBW_OnClick()
+    ChatThrottleLib:SendAddonMessage("ALERT", "TWA", "LoadTemplate=" .. template, "RAID")
+end
+
+function TWA.loadTemplateButtonClick(template, load)
+    if load ~= nil and load == true then
+        TWA.data = {}
+        -- if TWA_PRESETS[template] then
+        --     for e, f in next, TWA_PRESETS[template] do
+        --         TWA.data[e] = f
+        --     end
+        -- end
+        for i, d in next, twa_templates[template] do
+            TWA.data[i] = d
         end
+        -- local count = 0 -- Initialize counter
+        -- local last_d -- Variable to store the last good `d`
+        -- local last_index -- Variable to track the last key
+
+        -- for i, d in next, twa_templates[template] do
+        --     TWA.data[i] = d
+        --     last_d = d -- Update the last good `d`
+        --     last_index = i -- Track the last key
+        --     count = count + 1
+        --     if count >= 8 then
+        --         break
+        --     end
+        -- end
+
+        -- -- Fill remaining slots with an incremented version of `last_d`
+        -- while count < 8 do
+        --     last_index = (last_index or 1) + 1 -- Increment the last key or default to 1
+        --     TWA.data[last_index] = {"-", "-", "-", "-", "-", "-", "-"}
+        --     count = count + 1
+        -- end
         TWA.PopulateTWA()
         twaprint('Loaded template |cff69ccf0' .. template)
         getglobal('TWA_MainTemplates'):SetText(template)
@@ -3241,7 +3314,13 @@ function buildTemplatesDropdown()
                 dropdownItem.arg2 = false
                 UIDropDownMenu_AddButton(dropdownItem, UIDROPDOWNMENU_MENU_LEVEL);
             end
-
+            local dropdownItem = {}
+            dropdownItem.text = "Erenius"
+            dropdownItem.func = TWA.loadTemplate
+            dropdownItem.arg1 = 'erenius'
+            dropdownItem.arg2 = false
+            UIDropDownMenu_AddButton(dropdownItem, UIDROPDOWNMENU_MENU_LEVEL);
+            dropdownItem = nil
         end
 
         if UIDROPDOWNMENU_MENU_VALUE["key"] == 'mc' then
@@ -3522,7 +3601,7 @@ function LoadPreset_OnClick()
         twaprint('Please load a template first.')
     else
 
-        TWA.loadTemplate(TWA.loadedTemplate)
+        TWA.loadTemplateButtonClick(TWA.loadedTemplate)
 
         if TWA_PRESETS[TWA.loadedTemplate] then
 
