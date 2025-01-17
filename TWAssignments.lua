@@ -485,7 +485,7 @@ TWA:SetScript("OnEvent", function()
                 }
                 TWA.raid = TWA_RAID
             end
-            print("TWA_LOADED_TEMPLATE:" .. TWA_LOADED_TEMPLATE)
+            -- print("TWA_LOADED_TEMPLATE:" .. TWA_LOADED_TEMPLATE)
             if not TWA_LOADED_TEMPLATE then
                 TWA_LOADED_TEMPLATE = TWA.loadedTemplate
             end
@@ -498,7 +498,7 @@ TWA:SetScript("OnEvent", function()
             if (TWA.loadedTemplate ~= '') then
                 getglobal('TWA_MainTemplates'):SetText(TWA.loadedTemplate)
             end
-            print('current template ' .. TWA_LOADED_TEMPLATE)
+            -- print('current template ' .. TWA_LOADED_TEMPLATE)
             -- REYNER TEST
             -- Call this function when initializing the addon
             TWA.InitClassDropdown()
