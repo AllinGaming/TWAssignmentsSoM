@@ -3144,7 +3144,7 @@ function TWA.Reset()
 
     -- Replace TWA.data with the updated copy
     TWA.data = newData
-
+    TWA_DATA = TWA.data
     -- Populate the new data into the UI
     TWA.PopulateTWA()
 end
