@@ -839,13 +839,13 @@ function parsePlayersFromJSON()
         local nameStart, nameEnd = string.find(playerEntry, '"name":%s*"(.-)"')
         local classStart, classEnd = string.find(playerEntry, '"class":%s*"(.-)"')
         local roleStart, roleEnd = string.find(playerEntry, '"role":%s*"(.-)"')
-        local classEmoteStart, classEmoteEnd = string.find(playerEntry, '"class_emote":%s*"(.-)"')
+        local classEmoteStart, classEmoteEnd = string.find(playerEntry, '"spec_emote":%s*"(.-)"')
 
         if nameStart and classStart and classEmoteStart then
             local name = stripQuotes(string.sub(playerEntry, nameStart + 8, nameEnd))
             local class = stripQuotes(string.sub(playerEntry, classStart + 9, classEnd))
             local role = roleStart and stripQuotes(string.sub(playerEntry, roleStart + 8, roleEnd)) or ""
-            local classEmoteId = stripQuotes(string.sub(playerEntry, classEmoteStart + 15, classEmoteEnd))
+            local classEmoteId = stripQuotes(string.sub(playerEntry, classEmoteStart + 15, classEmoteEnd-1))
 
             -- Convert to lowercase
             -- name = string.lower(name)
@@ -857,15 +857,20 @@ function parsePlayersFromJSON()
             if start_pos then
                 name = string.sub(name, 1, start_pos - 1)
             end
-
-            -- Assign class based on `classEmoteId`
-            if classEmoteId == "637564444834136065" then
-                class = "warrior"
-            elseif classEmoteId == "637564297647489034" then
-                class = "paladin"
-            elseif classEmoteId == "637564171696734209" then
-                class = "druid"
+            -- Assign class based on `tank class`
+            if class == "tank" then
+                print(class)
+                print(classEmoteId)
+                -- Assign class based on `classEmoteId`
+                if classEmoteId == "637564444834136065" then
+                    class = "warrior"
+                elseif classEmoteId == "637564297647489034" then
+                    class = "paladin"
+                elseif classEmoteId == "637564171696734209" then
+                    class = "druid"
+                end
             end
+
             -- Ensure class exists in TWA.raid
             if not TWA.raid[class] then
                 TWA.raid[class] = {} -- Initialize empty table for class
