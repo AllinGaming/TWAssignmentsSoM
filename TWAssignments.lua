@@ -802,7 +802,7 @@ function parsePlayersFromJSON()
     -- Locate "signups" section in JSON string
     local signUpsSectionStart, signUpsSectionEnd = string.find(exampleJSONe, '"signups":%s*%[')
     if not signUpsSectionStart then
-        print("No 'signups' section found in JSON.")
+        -- print("No 'signups' section found in JSON.")
         return players
     end
 
@@ -859,8 +859,8 @@ function parsePlayersFromJSON()
             end
             -- Assign class based on `tank class`
             if class == "tank" then
-                print(class)
-                print(classEmoteId)
+                -- print(class)
+                -- print(classEmoteId)
                 -- Assign class based on `classEmoteId`
                 if classEmoteId == "637564444834136065" then
                     class = "warrior"
@@ -2012,12 +2012,12 @@ function removeManualRaider()
         for i, raider in ipairs(members) do
             if raider == TWA_NameInput:GetText() then
                 table.remove(members, i)
-                print("Raider " .. TWA_NameInput:GetText() .. " removed from class " .. class .. ".")
+                -- print("Raider " .. TWA_NameInput:GetText() .. " removed from class " .. class .. ".")
                 return
             end
         end
     end
-    print("Raider " .. TWA_NameInput:GetText() .. " not found.")
+    -- print("Raider " .. TWA_NameInput:GetText() .. " not found.")
 
     TWA_RAID = TWA.raid
 end
@@ -2146,7 +2146,7 @@ function TWA.handleSync(pre, t, ch, sender)
 
                     -- Print for debugging
                 else
-                    print("Invalid format for class data.")
+                    twaprint("Invalid format for class data.")
                 end
                 -- Check if matching was successful
                 if class and playerList then
@@ -3683,12 +3683,12 @@ function SyncBW_OnClick()
             local playerList = table.concat(players, ", ")
             local message = "BWSynchRaid=" .. class .. ": " .. playerList
             ChatThrottleLib:SendAddonMessage("ALERT", "TWABW", message, "RAID")
-            print("sendingmsg" .. message)
+            -- print("sendingmsg" .. message)
         else
             -- Handle empty classes if necessary
             local message = "BWSynchRaid=" .. class .. ": None"
             ChatThrottleLib:SendAddonMessage("ALERT", "TWABW", message, "RAID")
-            print("BWSynchRaid" .. message)
+            -- print("BWSynchRaid" .. message)
         end
     end
     ChatThrottleLib:SendAddonMessage("ALERT", "TWABW", "BWSynchRaid=end", "RAID")
