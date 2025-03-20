@@ -782,131 +782,119 @@ function parsePlayersFromRaid()
     TWA.fillRaidDataCustom()
     TWA.PopulateTWA()
 end
--- Function to extract player names and classes from JSON input
+-- -- Function to extract player names and classes from JSON input
 function parsePlayersFromJSON()
     local exampleJSONe = TWA_NameInput:GetText()
-    -- default
+
+    -- Default player classification
     local players = {
-        ['warrior'] = {},
-        ['paladin'] = {},
-        ['druid'] = {},
-        ['warlock'] = {},
-        ['mage'] = {},
-        ['priest'] = {},
-        ['rogue'] = {},
-        ['shaman'] = {},
-        ['hunter'] = {},
-        ['tanks'] = {},
-        ['tank'] = {},
-        ['healers'] = {},
+        ['warrior'] = {}, ['paladin'] = {}, ['druid'] = {}, ['warlock'] = {},
+        ['mage'] = {}, ['priest'] = {}, ['rogue'] = {}, ['shaman'] = {},
+        ['hunter'] = {}, ['tanks'] = {}, ['tank'] = {}, ['healers'] = {},
         ['absence'] = {}
     }
-    local signUpsSectionStart, signUpsSectionEnd = string.find(exampleJSONe, '"signUps":%s*%[')
-    local function isSubstringInString(substring, fullString)
 
-        local startPos, endPos = string.find(fullString, substring)
-        return startPos ~= nil
+    -- Ensure TWA.raid is initialized
+    if not TWA.raid then
+        TWA.raid = {}
     end
-    -- Check if 'signUps' section is found
+
+    -- Locate "signups" section in JSON string
+    local signUpsSectionStart, signUpsSectionEnd = string.find(exampleJSONe, '"signups":%s*%[')
     if not signUpsSectionStart then
-        print("No 'signUps' section found in JSON.")
+        print("No 'signups' section found in JSON.")
         return players
     end
 
+    -- Extract signups block
     local signUpsContent = string.sub(exampleJSONe, signUpsSectionEnd + 1)
     local signUpsSectionEndIndex = string.find(signUpsContent, "%]")
     local signUpsString = string.sub(signUpsContent, 1, signUpsSectionEndIndex - 1)
 
-    -- Loop through each player entry within 'signUps'
+    -- Function to strip surrounding quotes from extracted values
+    local function stripQuotes(value)
+        if value and string.sub(value, 1, 1) == '"' and string.sub(value, -1) == '"' then
+            return string.sub(value, 2, -2)
+        end
+        return value
+    end
+
+    -- Function to check if a substring exists in a string
+    local function isSubstringInString(substring, fullString)
+        local startPos, _ = string.find(fullString, substring)
+        return startPos ~= nil
+    end
+
+    -- Loop through each player entry within "signups"
     local i = 1
     while true do
-        local playerStart, playerEnd = string.find(signUpsString, '{(.-)}', i)
+        local playerStart, playerEnd = string.find(signUpsString, '{.-}', i)
         if not playerStart then
             break
         end
 
-        local playerEntry = string.sub(signUpsString, playerStart + 1, playerEnd - 1)
-        -- print(playerEntry)
-        -- Extract name and class using 'find'
-        local nameStart, nameEnd = string.find(playerEntry, '"name":%s*"([^"]-)"')
-        local classEmoteIdStart, classEmoteIdEnd = string.find(playerEntry, '"specEmoteId":%s*"([^"]-)"')
-        -- print(nameStart)
-        -- print(nameEnd)
-        -- Extract name and class using 'find'
-        -- local roleNameStart, roleNameEnd = string.find(playerEntry, '"roleName":%s*"([^"]-)"')
-        -- print(nameStart)
-        -- print(nameEnd)
-        local classStart, classEnd = string.find(playerEntry, '"className":%s*"([^"]-)"')
-        -- print(classStart)
-        -- print(classEnd)
-        if nameStart and classStart and classEmoteIdStart then
-            local name = string.sub(playerEntry, nameStart + 9, nameEnd - 1)
-            -- Find the position of the first "/"
-            local start_pos = string.find(name, "/")
+        local playerEntry = string.sub(signUpsString, playerStart, playerEnd)
 
-            -- If "/" is not found, use the entire string
+        -- Extract Name, Class, Role, and Class Emote ID
+        local nameStart, nameEnd = string.find(playerEntry, '"name":%s*"(.-)"')
+        local classStart, classEnd = string.find(playerEntry, '"class":%s*"(.-)"')
+        local roleStart, roleEnd = string.find(playerEntry, '"role":%s*"(.-)"')
+        local classEmoteStart, classEmoteEnd = string.find(playerEntry, '"class_emote":%s*"(.-)"')
+
+        if nameStart and classStart and classEmoteStart then
+            local name = stripQuotes(string.sub(playerEntry, nameStart + 8, nameEnd))
+            local class = stripQuotes(string.sub(playerEntry, classStart + 9, classEnd))
+            local role = roleStart and stripQuotes(string.sub(playerEntry, roleStart + 8, roleEnd)) or ""
+            local classEmoteId = stripQuotes(string.sub(playerEntry, classEmoteStart + 15, classEmoteEnd))
+
+            -- Convert to lowercase
+            -- name = string.lower(name)
+            class = string.lower(class)
+            role = string.lower(role)
+
+            -- Remove extra parts from names (e.g., "Player1/AltName")
+            local start_pos = string.find(name, "/")
             if start_pos then
                 name = string.sub(name, 1, start_pos - 1)
-            else
-                name = name
-            end
-            -- print(name .. " name")
-            -- local roleName = string.sub(playerEntry, roleNameStart + 13, roleNameEnd - 1)
-            -- print(roleName .. " roleName")
-
-            local class = string.sub(playerEntry, classStart + 14, classEnd - 1)
-            -- print(class .. " class")
-            local classEmoteId = ""
-            if classEmoteIdStart then
-                classEmoteId = string.sub(playerEntry, classEmoteIdStart + 16, classEmoteIdEnd - 1)
             end
 
-            -- print(classEmoteId .. " class")
-            local stringy = string.lower(class)
-            -- print(stringy .. "djokica")
-            if isSubstringInString("bench", stringy) or isSubstringInString("absence", stringy) or
-                isSubstringInString("tentative", stringy) or isSubstringInString("late", stringy) then
-                local f = 0
-            else
-                if stringy == "tank" or stringy == "tanks" or stringy == "melee" then
-                    stringy = "warrior"
-                end
-                if classEmoteId == "637564444834136065" then
-                    stringy = "warrior"
-                end
-                if classEmoteId == "637564297647489034" then
-                    stringy = "paladin"
-                end
-                if classEmoteId == "637564171696734209" then
-                    stringy = "druid"
-                end
-                -- Check if name already exists in TWA.raid[unitClass]
-                local exists = false
-                for _, existingName in ipairs(TWA.raid[stringy]) do
-                    if existingName == name then
-                        exists = true
-                        break
-                    end
-                end
-
-                -- Add name to the table only if it doesn't exist
-                if not exists then
-                    table.insert(TWA.raid[stringy], name)
-                    table.sort(TWA.raid[stringy])
-                end
-
-                TWA_RAID = TWA.raid
-                -- table.insert(TWA.raid[stringy], name)
+            -- Assign class based on `classEmoteId`
+            if classEmoteId == "637564444834136065" then
+                class = "warrior"
+            elseif classEmoteId == "637564297647489034" then
+                class = "paladin"
+            elseif classEmoteId == "637564171696734209" then
+                class = "druid"
             end
+            -- Ensure class exists in TWA.raid
+            if not TWA.raid[class] then
+                TWA.raid[class] = {} -- Initialize empty table for class
+            end
+
+            -- Check for duplicates before adding
+            local exists = false
+            for _, existingName in ipairs(TWA.raid[class]) do
+                if existingName == name then
+                    exists = true
+                    break
+                end
+            end
+
+            if not exists then
+                table.insert(TWA.raid[class], name)
+                table.sort(TWA.raid[class])
+            end
+
+            TWA_RAID = TWA.raid
         end
 
-        i = playerEnd + 1 -- move to the next player entry
+        i = playerEnd + 1 -- Move to the next player entry
     end
 
     return players
 end
 
--- Example usage
+-- Example usage old
 exampleJSON = [[
     {
         "date": "16-1-2025",
